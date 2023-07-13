@@ -1,6 +1,7 @@
 package com.mu.im.tcp;
 
 import com.mu.im.codec.config.BootstrapConfig;
+import com.mu.im.tcp.redis.RedisManager;
 import com.mu.im.tcp.server.ImServer;
 import com.mu.im.tcp.server.ImWebSocketServer;
 import org.yaml.snakeyaml.Yaml;
@@ -29,6 +30,8 @@ public class Starter {
 
             new ImServer(bootstrapConfig.getIm()).start();
             new ImWebSocketServer(bootstrapConfig.getIm()).start();
+
+            RedisManager.init(bootstrapConfig);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(500);
