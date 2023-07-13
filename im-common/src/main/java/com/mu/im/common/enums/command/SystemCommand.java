@@ -5,12 +5,24 @@ package com.mu.im.common.enums.command;
  * Date: 2023-07-10 9:27
  * version: 1.0
  */
-public enum SystemCommand implements Command{
+public enum SystemCommand implements Command {
+
+    //心跳 9999
+    PING(0x270f),
 
     /**
      * 登录 9000
      */
     LOGIN(0x2328),
+
+    //登录ack  9001
+    LOGINACK(0x2329),
+
+    //登出  9003
+    LOGOUT(0x232b),
+
+    //下线通知 用于多端互斥  9002
+    MUTUALLOGIN(0x232a),
 
     ;
 
@@ -25,5 +37,4 @@ public enum SystemCommand implements Command{
     public int getCommand() {
         return command;
     }
-
 }

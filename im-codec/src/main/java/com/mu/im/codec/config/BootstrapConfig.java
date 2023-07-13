@@ -27,6 +27,8 @@ public class BootstrapConfig {
 
         private Integer workThreadSize; //work线程
 
+        private Long heartBeatTime; //心跳超时时间 单位毫秒
+
         /**
          * redis配置
          */

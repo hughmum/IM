@@ -32,6 +32,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
     private final static Logger logger = LoggerFactory.getLogger(ImServer.class);
 
 
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
         Integer command = msg.getMessageHeader().getCommand();
@@ -68,17 +69,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
         } else if (command == SystemCommand.LOGIN.getCommand()) {
             // 删除session
             // redis删除
-            String userId = (String) ctx.channel().attr(AttributeKey.valueOf("userId")).get();
-            Integer appId = (Integer) ctx.channel().attr(AttributeKey.valueOf(Constants.AppId)).get();
-            Integer clientType = (Integer) ctx.channel().attr(AttributeKey.valueOf(Constants.ClientType)).get();
-
-            //删除session
-            SessionSocketHolder.remove(appId, userId, clientType);
-            RedissonClient redissonClient = RedisManager.getRedissonClient();
-            RMap<Object, Object> map = redissonClient.getMap(appId +
-                    Constants.RedisConstants.UserSessionConstants + userId);
-            map.remove(clientType);
-            ctx.channel().close();
+            SessionSocketHolder.removeUserSession((NioSocketChannel) ctx.channel());
+        } else if (command == SystemCommand.PING.getCommand()) {
+            //把最后一次读写时间写入到handler里面
+            ctx.channel()
+                    .attr(AttributeKey.valueOf(Constants.ReadTime)).set(System.currentTimeMillis());
         }
     }
+
+
 }

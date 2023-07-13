@@ -3,6 +3,7 @@ package com.mu.im.tcp.server;
 
 import com.mu.im.codec.MessageDecoder;
 import com.mu.im.codec.config.BootstrapConfig;
+import com.mu.im.tcp.handler.HeartBeatHandler;
 import com.mu.im.tcp.handler.NettyServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -11,6 +12,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +22,6 @@ import org.slf4j.LoggerFactory;
  * version: 1.0
  */
 public class ImServer {
-
     //日志类
     private final static Logger logger = LoggerFactory.getLogger(ImServer.class);
     BootstrapConfig.TcpConfig config;
@@ -43,6 +44,10 @@ public class ImServer {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline().addLast(new MessageDecoder());
+                        ch.pipeline().addLast(new IdleStateHandler(
+                                0,0,1
+                        ));
+                        ch.pipeline().addLast(new HeartBeatHandler(config.getHeartBeatTime())); //向心跳检测里面传入超时时间
                         ch.pipeline().addLast(new NettyServerHandler());
                     }
                 });
@@ -51,4 +56,6 @@ public class ImServer {
     public void start() {
         this.server.bind(this.config.getTcpPort());
     }
+
+
 }
