@@ -1,9 +1,11 @@
 package com.mu.im.tcp;
 
 import com.mu.im.codec.config.BootstrapConfig;
+import com.mu.im.tcp.reciver.MessageReciver;
 import com.mu.im.tcp.redis.RedisManager;
 import com.mu.im.tcp.server.ImServer;
 import com.mu.im.tcp.server.ImWebSocketServer;
+import com.mu.im.tcp.utils.MqFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
@@ -32,6 +34,9 @@ public class Starter {
             new ImWebSocketServer(bootstrapConfig.getIm()).start();
 
             RedisManager.init(bootstrapConfig);
+            MqFactory.init(bootstrapConfig.getIm().getRabbitmq());
+            MessageReciver.init();
+
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(500);
