@@ -11,6 +11,10 @@ import com.mu.im.common.model.UserSession;
 import com.mu.im.tcp.redis.RedisManager;
 import com.mu.im.tcp.server.ImServer;
 import com.mu.im.tcp.utils.SessionSocketHolder;
+import feign.Feign;
+import feign.Request;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -20,6 +24,8 @@ import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
 
 /**
  * @author Mr.yuan
@@ -31,7 +37,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
 
     private final static Logger logger = LoggerFactory.getLogger(ImServer.class);
 
+    private Integer brokerId;
 
+    public NettyServerHandler(Integer brokerId) {
+        this.brokerId = brokerId;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
@@ -52,6 +62,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
             userSession.setClientType(msg.getMessageHeader().getClientType());
             userSession.setUserId(loginPack.getUserId());
             userSession.setConnectState(ImConnectStatusEnum.ONLINE_STATUS.getCode());
+            userSession.setBrokerId(brokerId);
+            try {
+                InetAddress localHost = InetAddress.getLocalHost();
+                userSession.setBrokerHost(localHost.getHostAddress());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
 
             //存储到redis
             RedissonClient redissonClient = RedisManager.getRedissonClient();
@@ -77,5 +94,17 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
         }
     }
 
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+
+
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        super.exceptionCaught(ctx, cause);
+
+    }
 
 }
