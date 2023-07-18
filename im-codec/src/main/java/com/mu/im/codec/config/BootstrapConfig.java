@@ -29,6 +29,8 @@ public class BootstrapConfig {
 
         private Long heartBeatTime; //心跳超时时间 单位毫秒
 
+        private Integer loginModel;
+
         /**
          * redis配置
          */

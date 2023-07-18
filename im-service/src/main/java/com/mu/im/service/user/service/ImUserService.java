@@ -2,10 +2,7 @@ package com.mu.im.service.user.service;
 
 import com.mu.im.common.ResponseVO;
 import com.mu.im.service.user.dao.ImUserDataEntity;
-import com.mu.im.service.user.model.req.DeleteUserReq;
-import com.mu.im.service.user.model.req.GetUserInfoReq;
-import com.mu.im.service.user.model.req.ImportUserReq;
-import com.mu.im.service.user.model.req.ModifyUserInfoReq;
+import com.mu.im.service.user.model.req.*;
 import com.mu.im.service.user.model.resp.GetUserInfoResp;
 
 /**
@@ -29,4 +26,6 @@ public interface ImUserService {
     public ResponseVO deleteUser(DeleteUserReq req);
 
     public ResponseVO modifyUserInfo(ModifyUserInfoReq req);
+
+    public ResponseVO login(LoginReq req);
 }

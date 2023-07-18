@@ -6,10 +6,7 @@ import com.mu.im.common.enums.DelFlagEnum;
 import com.mu.im.common.enums.UserErrorCode;
 import com.mu.im.service.user.dao.ImUserDataEntity;
 import com.mu.im.service.user.dao.mapper.ImUserDataMapper;
-import com.mu.im.service.user.model.req.DeleteUserReq;
-import com.mu.im.service.user.model.req.GetUserInfoReq;
-import com.mu.im.service.user.model.req.ImportUserReq;
-import com.mu.im.service.user.model.req.ModifyUserInfoReq;
+import com.mu.im.service.user.model.req.*;
 import com.mu.im.service.user.model.resp.GetUserInfoResp;
 import com.mu.im.service.user.model.resp.ImportUserResp;
 import com.mu.im.service.user.service.ImUserService;
@@ -145,5 +142,10 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public ResponseVO modifyUserInfo(ModifyUserInfoReq req) {
         return null;
+    }
+
+    @Override
+    public ResponseVO login(LoginReq req) {
+        return ResponseVO.successResponse();
     }
 }

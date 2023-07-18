@@ -7,6 +7,7 @@ import com.mu.im.codec.proto.Message;
 import com.mu.im.common.constants.Constants;
 import com.mu.im.common.enums.ImConnectStatusEnum;
 import com.mu.im.common.enums.command.SystemCommand;
+import com.mu.im.common.model.UserClientDto;
 import com.mu.im.common.model.UserSession;
 import com.mu.im.tcp.redis.RedisManager;
 import com.mu.im.tcp.server.ImServer;
@@ -21,6 +22,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import com.alibaba.fastjson.TypeReference;
 import io.netty.util.AttributeKey;
 import org.redisson.api.RMap;
+import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +55,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
                     }.getType());
             ctx.channel().attr(AttributeKey.valueOf("userId")).set(loginPack.getUserId());
             ctx.channel().attr(AttributeKey.valueOf(Constants.AppId)).set(msg.getMessageHeader().getAppId());
-            ctx.channel().attr(AttributeKey.valueOf(Constants.ClientType))
-                    .set(msg.getMessageHeader().getClientType());
+            ctx.channel().attr(AttributeKey.valueOf(Constants.ClientType)).set(msg.getMessageHeader().getClientType());
+            ctx.channel().attr(AttributeKey.valueOf(Constants.Imei)).set(msg.getMessageHeader().getImei());
             //将channel存起来
             //Redis map
             UserSession userSession = new UserSession();
@@ -73,16 +75,23 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
             //存储到redis
             RedissonClient redissonClient = RedisManager.getRedissonClient();
             RMap<Object, Object> map = redissonClient.getMap(msg.getMessageHeader().getAppId() + Constants.RedisConstants.UserSessionConstants + loginPack.getUserId());
-            map.put(msg.getMessageHeader().getClientType() + ":" + msg.getMessageHeader().getImei(),
-                    JSON.toJSONString(userSession));
+            map.put(msg.getMessageHeader().getClientType()+":" + msg.getMessageHeader().getImei()
+                    ,JSONObject.toJSONString(userSession));
 
 
             SessionSocketHolder
                     .put(msg.getMessageHeader().getAppId()
                             ,loginPack.getUserId(),
-                            msg.getMessageHeader().getClientType(),
-                            msg.getMessageHeader().getImei(),
-                            (NioSocketChannel) ctx.channel());
+                            msg.getMessageHeader().getClientType(),msg.getMessageHeader().getImei(),(NioSocketChannel) ctx.channel());
+
+            UserClientDto dto = new UserClientDto();
+            dto.setImei(msg.getMessageHeader().getImei());
+            dto.setUserId(loginPack.getUserId());
+            dto.setClientType(msg.getMessageHeader().getClientType());
+            dto.setAppId(msg.getMessageHeader().getAppId());
+            RTopic topic = redissonClient.getTopic(Constants.RedisConstants.UserLoginChannel);
+            topic.publish(JSONObject.toJSONString(dto));
+
         } else if (command == SystemCommand.LOGIN.getCommand()) {
             // 删除session
             // redis删除

@@ -2,6 +2,7 @@ package com.mu.im.tcp.server;
 
 
 import com.mu.im.codec.MessageDecoder;
+import com.mu.im.codec.MessageEncoder;
 import com.mu.im.codec.config.BootstrapConfig;
 import com.mu.im.tcp.handler.HeartBeatHandler;
 import com.mu.im.tcp.handler.NettyServerHandler;
@@ -44,9 +45,10 @@ public class ImServer {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline().addLast(new MessageDecoder());
-                        ch.pipeline().addLast(new IdleStateHandler(
-                                0,0,1
-                        ));
+                        ch.pipeline().addLast(new MessageEncoder());
+//                        ch.pipeline().addLast(new IdleStateHandler(
+//                                0,0,1
+//                        ));
                         ch.pipeline().addLast(new HeartBeatHandler(config.getHeartBeatTime())); //向心跳检测里面传入超时时间
                         ch.pipeline().addLast(new NettyServerHandler(config.getBrokerId()));
                     }
