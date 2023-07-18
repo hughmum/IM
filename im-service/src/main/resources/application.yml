@@ -10,6 +10,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/im-core?serverTimezone=UTC&useSSL=false&characterEncoding=UTF8
     username: root
 
+
 # logger 配置
 logging:
   config: classpath:logback-spring.xml
