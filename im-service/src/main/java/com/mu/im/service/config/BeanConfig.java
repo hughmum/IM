@@ -2,6 +2,8 @@ package com.mu.im.service.config;
 
 import com.mu.im.common.config.AppConfig;
 import com.mu.im.common.route.RouteHandle;
+import com.mu.im.common.route.algorithm.consistenthash.ConsistentHashHandle;
+import com.mu.im.common.route.algorithm.consistenthash.TreeMapConsistentHash;
 import com.mu.im.common.route.algorithm.loop.LoopHandle;
 import com.mu.im.common.route.algorithm.random.RandomHandle;
 import org.I0Itec.zkclient.ZkClient;
@@ -29,7 +31,10 @@ public class BeanConfig {
 
     @Bean
     public RouteHandle routeHandle() {
-        return new LoopHandle();
+        ConsistentHashHandle consistentHashHandle = new ConsistentHashHandle();
+        TreeMapConsistentHash treeMapConsistentHash = new TreeMapConsistentHash();
+        consistentHashHandle.setHash(treeMapConsistentHash);
+        return consistentHashHandle;
     }
 
 }
