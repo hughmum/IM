@@ -83,4 +83,4 @@ httpclient:
   staleConnectionCheckEnabled: true
 
 mpp:
-  entityBasePath: com.lld.im.service.friendship.dao
+  entityBasePath: com.mu.im.service.friendship.dao

@@ -1,17 +1,24 @@
 package com.mu.im.service.user.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mu.im.common.ResponseVO;
+import com.mu.im.common.config.AppConfig;
+import com.mu.im.common.constants.Constants;
 import com.mu.im.common.enums.DelFlagEnum;
 import com.mu.im.common.enums.UserErrorCode;
+import com.mu.im.common.exception.ApplicationException;
 import com.mu.im.service.user.dao.ImUserDataEntity;
 import com.mu.im.service.user.dao.mapper.ImUserDataMapper;
 import com.mu.im.service.user.model.req.*;
 import com.mu.im.service.user.model.resp.GetUserInfoResp;
 import com.mu.im.service.user.model.resp.ImportUserResp;
 import com.mu.im.service.user.service.ImUserService;
+import com.mu.im.service.utils.CallbackService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +34,12 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Autowired
     ImUserDataMapper imUserDataMapper;
+
+    @Autowired
+    AppConfig appConfig;
+
+    @Autowired
+    CallbackService callbackService;
 
 
     @Override
@@ -140,8 +153,33 @@ public class ImUserServiceImpl implements ImUserService {
 
 
     @Override
+    @Transactional
     public ResponseVO modifyUserInfo(ModifyUserInfoReq req) {
-        return null;
+        QueryWrapper query = new QueryWrapper<>();
+        query.eq("app_id",req.getAppId());
+        query.eq("user_id",req.getUserId());
+        query.eq("del_flag",DelFlagEnum.NORMAL.getCode());
+        ImUserDataEntity user = imUserDataMapper.selectOne(query);
+        if(user == null){
+            throw new ApplicationException(UserErrorCode.USER_IS_NOT_EXIST);
+        }
+
+        ImUserDataEntity update = new ImUserDataEntity();
+        BeanUtils.copyProperties(req,update);
+
+        update.setAppId(null);
+        update.setUserId(null);
+        int update1 = imUserDataMapper.update(update, query);
+        if(update1 == 1){
+
+            if (appConfig.isModifyUserAfterCallback()) {
+                callbackService.callback(req.getAppId(),
+                        Constants.CallbackCommand.ModifyUserAfter,
+                        JSONObject.toJSONString(req));
+            }
+            return ResponseVO.successResponse();
+        }
+        throw new ApplicationException(UserErrorCode.MODIFY_USER_ERROR);
     }
 
     @Override
